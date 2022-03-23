@@ -1,0 +1,306 @@
+---
+title: "Manipulação de dados com R"
+author: "Kleber"
+date: "22/03/2022"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Instalação do R e do Rstudio
+
+- R:
+
+<a href="https://www.r-project.org/">https://www.r-project.org/</a>
+
+- Rstudio:
+
+<a href="https://www.rstudio.com/">https://www.rstudio.com/</a>
+
+
+## R base
+
+```{r rbase, echo = TRUE}
+1 + 1
+x = c(3, 4, 5, 7)
+m = matrix(c(1,2,3,4,5,6), 3, 2, byrow=TRUE)
+
+df = data.frame(nome = c('Joana', 'Marta', 'Félix', 'João', 'Ana'), 
+                sexo = c('F', 'F', 'M', 'M', 'F'),
+                filhos = c(0, 1, 1, 0, 2),
+                notas = c(5.7, 8.8, 9, 6, 10))
+
+lista = list(num= 1,
+             vetor = x,
+             dataframe = df)
+
+```
+
+## Gráficos simples
+- pie
+- barplot
+- plot
+- hist
+- boxplot
+
+
+## Entrada de dados por arquivos
+
+```{r entrada, echo = TRUE, warning=FALSE, message=FALSE}
+#setwd('..\\Dados')
+df1 = read.csv('Dados\\teste.csv', header=T)
+
+df2 = read.table('Dados\\Notas.txt', header=T)
+
+#install.packages('readxl')
+#install.packages('janitor')
+library(readxl)
+library(janitor)
+
+milho = read_excel('Dados\\milho_br.xlsx', sheet=3, skip=4)
+colnames(milho) = c('Nível',	'Cód.',	'Município', 
+                    'Total', 'Unidade de Medida')
+clean_names(milho)
+```
+
+
+
+## Tibbles
+
+```{r tibbles, echo = TRUE, warning=FALSE, message=FALSE}
+library(tidyverse)
+tb1 = tibble(a = c('a', 'g', 'd'), 
+             b = 1:3, 
+             c = c(3.3, 3.4, 3.0), 
+             funcoes=c(mean, max, sd))
+
+media = tb1$funcoes[[1]]
+media(c(1,2,3))
+
+df = iris
+tb2 = as_tibble(df)
+tb2
+
+head(tb2, 10)
+
+tail(tb2, 10)
+
+print(tb2, n = Inf)
+```
+
+## Tibbles com a função tribble
+
+```{r tribbles, echo = TRUE, warning=FALSE, message=FALSE}
+notas = tribble(~aluno, ~ano, ~mat, ~port, ~sexo,
+                'João', 2003, 9, 9, 'M',
+                'João', 2004, 8,8.9, 'M',
+                'João', 2005, 8.5, 7, 'M',
+                'Ana', 2003, 9.1,7.8, 'F',
+                'Ana', 2005, 9.1, 8, 'F'
+)
+
+```
+
+
+## Operador pipe
+
+pipe:
+<a href="https://www.datacamp.com/community/tutorials/pipe-r-tutorial">https://www.datacamp.com/community/tutorials/pipe-r-tutorial</a>
+
+tidyverse:
+<a href="https://oliviergimenez.github.io/intro_tidyverse/#7">https://oliviergimenez.github.io/intro_tidyverse/#7</a>
+
+
+
+```{r pipe, echo = TRUE, warning=FALSE, message=FALSE}
+#install.packages('tidyverse')
+library(tidyverse)
+min(max(round(sqrt(1:40), 1)))
+
+
+
+(1:40) %>% 
+  sqrt() %>% 
+  round(1) %>% 
+  max() %>% 
+  min()
+```
+
+
+## Pivot_longer
+
+
+```{r pivot_longer, echo = TRUE, warning=FALSE, message=FALSE}
+dados = read_excel('Dados\\populacao.xls', skip = 3, sheet = 1)
+
+dados.org = dados %>% pivot_longer(cols = `1960`:`2020`, 
+                       names_to = "ano", values_to = "populacao")
+
+#billboard
+
+billboard.org = billboard %>% pivot_longer(cols = wk1:wk76, 
+                                    names_to = "semana", 
+                                    values_to = "rank")
+#billboard.org
+```
+
+## Pivot_wider
+
+```{r pivot_wider, echo = TRUE, warning=FALSE, message=FALSE}
+dados = tribble(~n, ~aluno, ~discip, ~nota,
+                1,   'Ana', 'port',      7,
+                2,   'Ana',  'mat',      9,
+                3,   'Ana',  'geo',      8,
+                4,   'Miguel','mat',   9.8
+                )
+#dados
+
+dados.org = dados %>% pivot_wider(names_from = discip, values_from = nota,
+                      values_fill = list(nota=0))
+#dados.org
+```
+
+## Separete
+
+```{r separate, echo = TRUE, warning=FALSE, message=FALSE}
+table3
+table3 %>% separate(col=rate, into = c("casos", "pop"), 
+                    sep = "/", convert = T)
+```
+
+
+## Complete
+
+```{r complete, echo = TRUE, warning=FALSE, message=FALSE}
+notas = tribble(~aluno, ~ano, ~mat,
+               'João', 2013, 9,
+               'João', 2014, 8,
+               'João', 2015, 8.5,
+               'Ana', 2013, 9.1,
+               'Ana', 2015, 9.1,
+               'Carla', 2015, 7)
+
+notas.na = notas %>% complete(aluno, ano)
+notas.na = notas %>% complete(aluno, ano=2013:2017)
+notas.na = notas %>% complete(aluno, ano=2013:2017, fill=list(mat='Sem Nota'))
+```
+
+
+## Select
+
+```{r select, echo = TRUE, warning=FALSE, message=FALSE}
+notas %>% select(aluno, mat)
+
+#notas %>% select(-ano)
+
+#notas %>% select(starts_with('al'))
+
+#notas %>% select(ends_with('t'))
+
+#notas %>% select(last_col())
+
+#notas %>% select(contains('a'))
+                 
+#notas %>% select(starts_with('a') & ends_with('no'))
+```
+
+
+## Filter
+
+```{r filter, echo = TRUE, warning=FALSE, message=FALSE}
+notas %>% filter(aluno == 'João')
+
+#notas %>% filter(aluno == 'João', mat > 8.5)
+
+#notas %>% filter(!aluno %in% c('Ana', 'Carla'))
+
+#notas %>% filter(!aluno %in% c('Ana', 'Carla'))
+
+```
+
+
+## Mutate / Transmute
+
+```{r mutate, echo = TRUE, warning=FALSE, message=FALSE}
+
+#airquality %>% mutate(rad_solar_med = mean(Solar.R, na.rm = T))
+
+#airquality %>% mutate(TempC = round((Temp - 32)/1.8,1))
+
+#airquality %>% transmute(TempC = round((Temp - 32)/1.8,1))
+
+```
+
+
+## Joins
+
+<a href="https://r4ds.had.co.nz/relational-data.html">https://r4ds.had.co.nz/relational-data.html</a>
+
+
+```{r joins, echo = TRUE, warning=FALSE, message=FALSE}
+a = tribble(~id, ~nome, ~idade,
+            1, 'Ana', 25,
+            2, 'Lucas', 64,
+            4, 'Tadeu', 29,
+            5, 'Maria', 18,
+            6, 'Tony', 21)
+
+b = tribble(~id, ~mat,
+            1, 8.7,
+            2, 9.3,
+            3, 6.9,
+            5, 7.8,
+            8, 8)
+
+#a %>% inner_join(b, by='id')
+
+#a %>% full_join(b, by='id')
+```
+
+
+## Arrange
+
+```{r arrange, echo = TRUE, warning=FALSE, message=FALSE}
+
+iris %>% arrange(Sepal.Length) %>% head(5)
+iris %>% arrange(desc(Sepal.Length), Sepal.Width) %>% head(5)
+```
+
+
+## summarise / group_by
+
+```{r sumarise, echo = TRUE, warning=FALSE, message=FALSE}
+library(janitor)
+dados = read_excel('Dados\\atlas2013_dadosbrutos_pt.xlsx', sheet = 2)
+
+dados %>% 
+  group_by(ANO) %>% 
+  summarise(esp.vida.m = mean(ESPVIDA, na.rm = T),
+            esp.vida.d = sd(ESPVIDA, na.rm = T),
+            tEnv.max = max(T_ENV, na.rm = T),
+            contagem = n()) %>% 
+  clean_names()
+```
+
+
+
+## Ggplot
+
+<a href="https://www.r-project.org/">https://www.r-project.org/</a>
+
+```{r ggplot, echo = TRUE, warning=FALSE, message=FALSE}
+p = airquality %>% 
+  ggplot(aes(Temp)) + 
+  geom_area(stat = "bin", fill = 'red', alpha = .5)
+
+p = airquality %>% 
+  ggplot(aes(as.factor(Month), Temp)) +
+  geom_boxplot()
+
+p = airquality %>% 
+  ggplot(aes(Temp, Wind)) + 
+  geom_hex()
+```
+

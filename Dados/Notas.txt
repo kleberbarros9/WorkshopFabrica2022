@@ -1,0 +1,6 @@
+Nome	Sexo	Filhos	Notas
+'Joana'	'F'	0	5.7
+'Marta'	'F'	1	8.8
+'Féliz'	'M'	1	9
+'João'	'M'	0	6
+'Notas'	'F'	2	10
