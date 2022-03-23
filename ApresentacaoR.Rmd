@@ -2,7 +2,7 @@
 title: "Manipulação de dados com R"
 author: "Kleber"
 date: "22/03/2022"
-output: slidy_presentation
+output: md_document
 ---
 
 ```{r setup, include=FALSE}
